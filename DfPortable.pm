@@ -9,7 +9,7 @@ require 5.006;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(dfportable);
-$VERSION = '0.80';
+$VERSION = '0.81';
 bootstrap Filesys::DfPortable $VERSION;
 
 sub dfportable {
@@ -94,7 +94,7 @@ This module provides a portable way to obtain filesystem
 disk space information.
 
 The module should work with all versions of Windows (95 and up),
-all flavors of Unix, and Mac OS X (Darwin, Tiger, etc).
+all flavors of Unix, Mac OS X (Darwin, Tiger, etc), and Cygwin.
 
 dfportable() requires a directory argument that represents the filesystem
 you want to query. There is also an optional block size argument so the

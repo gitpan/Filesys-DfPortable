@@ -12,5 +12,3 @@ DWORD        T_IV
 WORD         T_IV
 Statvfs	     T_PTRREF
 Statfs	     T_PTRREF
-
-
