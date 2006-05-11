@@ -7,22 +7,25 @@ SYNOPSIS
 
   use Filesys::DfPortable;
 
-
-  ($blocks, $bfree, $bavail) = dfportable("C:\\"); # Default block size is 1, which outputs bytes
-  if(defined($blocks)) {
-     print"Total bytes: $blocks\n";
-     print"Total bytes free: $bfree\n";
-     print"Total bytes avail to me: $bavail\n"
+  my $ref = dfportable("C:\\"); # Default block size is 1, which outputs bytes
+  if(defined($ref)) {
+     print"Total bytes: $ref->{blocks}\n";
+     print"Total bytes free: $ref->{bfree}\n";
+     print"Total bytes avail to me: $ref->{bavail}\n";
+     print"Total bytes used: $ref->{bused}\n";
+     print"Percent full: $ref->{per}\n"
+  }
+                                                                                                                
+                                                                                                                
+  my $ref = dfportable("/tmp", 1024); # Display output in 1K blocks
+  if(defined($ref)) {
+     print"Total 1k blocks: $ref->{blocks}\n";
+     print"Total 1k blocks free: $ref->{bfree}\n";
+     print"Total 1k blocks avail to me: $ref->{bavail}\n";
+     print"Total 1k blocks used: $ref->{bused}\n";
+     print"Percent full: $ref->{per}\n"
   }
 
-
-  ($blocks, $bfree, $bavail) = dfportable("/tmp", 1024); # Display output in 1K blocks
-  if(defined($blocks)) {
-     print"Total 1k blocks: $blocks\n";
-     print"Total 1k blocks free: $bfree\n";
-     print"Total 1k blocks avail to me: $bavail\n"
-  }
-  
 
 DESCRIPTION
 
@@ -38,19 +41,33 @@ size is 1, this will cause the function to return the values in bytes.
 If you never use the block size argument then you can think of any
 instance of "blocks" in this document to really mean "bytes". 
 
-The values returned are as followed:
-blocks = Total blocks for the filesystem.
-bfree = Total blocks free on the filesystem.
-bavail = Total blocks available to the user executing the Perl 
-application. This can be different than bfree if you have per-user 
+dfportable() returns a reference to a hash. The keys available in
+the hash are as follows:
+                                                                                                                
+{blocks} = Total blocks on the filesystem.
+                                                                                                                
+{bfree} = Total blocks free on the filesystem.
+                                                                                                                
+{bavail} = Total blocks available to the user executing the Perl
+application. This can be different than bfree if you have per-user
 quotas on the filesystem, or if the super user has a reserved amount.
-bavail can also be a negative value because of this.
+bavail can also be a negative value because of this. For instance
+if there is more space being used than on the disk than is available
+to you.
+                                                                                                                
+{bused} = Total blocks used on the filesystem.
+                                                                                                                
+{per} = Percent of disk space used. This is based on the disk space
+available to the user executing the application. In other words, if
+the filesystem has 10% of its space reserved for the superuser, then
+the percent used can go up to 110%.)
+
 
 If the dfportable() call fails for any reason, it will return
-undef and set $!. This will probably happen if you do anything
-crazy like try to get the disk space for /proc, or if you pass an invalid
-filesystem argument, or if there is an internal error. dfportable() will 
-croak() if you pass it a undefined value.
+undef. This will probably happen if you do anything crazy like try
+to get the disk space for /proc, or if you pass an invalid filesystem
+ argument, or if there is an internal error. dfportable() will croak()
+if you pass it a undefined value.
 
 
 Requirements:
@@ -68,7 +85,6 @@ TO INSTALL RUN:
 	make
 	make test
 	make install
-
 
 
 During the 'make test', test.pl will try to test with '/' if you are

@@ -21,15 +21,18 @@ my $dir;
 	$dir = "C:\\" or
 	$dir = "/";
 
-my @result = Filesys::DfPortable::dfportable($dir);
+my $ref = Filesys::DfPortable::dfportable($dir);
 
-defined(@result) and
+defined($ref) and
 	print"ok 2\n" or
 	die "not ok 2\nstatvfs\(\) call failed for \"$dir\" $!\n";
+
 print"Results for directory: \"$dir\" in bytes:\n";
-print "Total: $result[0]\n";
-print "Free: $result[1]\n";
-print "Avail: $result[2]\n";
+print "Total: $ref->{blocks}\n";
+print "Free: $ref->{bfree}\n";
+print "Available: $ref->{bavail}\n";
+print "Used: $ref->{bused}\n";
+print "Percent Full: $ref->{per}\n";
 
 
 print"All tests successful!\n\n";
