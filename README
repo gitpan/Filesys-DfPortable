@@ -1,0 +1,87 @@
+This distribution contains the module Filesys::DfPortable
+
+Filesys::DfPortable - Perl extension for filesystem disk space.
+
+SYNOPSIS
+
+
+  use Filesys::DfPortable;
+
+
+  ($blocks, $bfree, $bavail) = dfportable("C:\\"); # Default block size is 1, which outputs bytes
+  if(defined($blocks)) {
+     print"Total bytes: $blocks\n";
+     print"Total bytes free: $bfree\n";
+     print"Total bytes avail to me: $bavail\n"
+  }
+
+
+  ($blocks, $bfree, $bavail) = dfportable("/tmp", 1024); # Display output in 1K blocks
+  if(defined($blocks)) {
+     print"Total 1k blocks: $blocks\n";
+     print"Total 1k blocks free: $bfree\n";
+     print"Total 1k blocks avail to me: $bavail\n"
+  }
+  
+
+DESCRIPTION
+
+This module provides a portable way to obtain filesystem 
+disk space information.
+
+The module should work with all versions of Windows (95 and up),
+all flavors of Unix, and Mac OS X (Darwin, Tiger, etc).
+
+dfportable() requires a directory argument that represents the filesystem
+you want to query. There is also an optional block size argument so the
+you can tailor the size of the values returned. The default for block
+size is 1, this will cause the function to return the values in bytes.
+If you never use the block size argument then you can think of any
+instance of "blocks" in this document to really mean "bytes". 
+
+The values returned are as followed:
+blocks = Total blocks for the filesystem.
+bfree = Total blocks free on the filesystem.
+bavail = Total blocks available to the user executing the Perl 
+application. This can be different than bfree if you have per-user 
+quotas on the filesystem, or if the super user has a reserved amount.
+bavail can also be a negative value because of this.
+
+If the dfportable() call fails for any reason, it will return
+undef and set $!. This will probably happen if you do anything
+crazy like try to get the disk space for /proc, or if you pass an invalid
+filesystem argument, or if there is an internal error. dfportable() will 
+croak() if you pass it a undefined value.
+
+
+Requirements:
+Your system must contain either statvfs(), statfs(), GetDiskFreeSpaceA(), 
+or GetDiskFreeSpaceEx().
+
+You must be running Perl 5.6 or higher.
+
+
+
+INSTALL
+TO INSTALL RUN:
+	
+	perl Makefile.PL
+	make
+	make test
+	make install
+
+
+
+During the 'make test', test.pl will try to test with '/' if you are
+using a Unix system or 'c:\' if you are using Windows. 
+
+Once installed, run 'perldoc Filesys::DfPortable' for more information. 
+
+If you have any problems or questions please email me at IGuthrie@aol.com
+with "DfPortable" in the subject line. If you run into a build problem, 
+please include the output of the install commands, the version of Perl
+you are using (perl -v), and what operating system you are using.
+
+Copyright (c) 2006 Ian Guthrie. All rights reserved.
+               This program is free software; you can redistribute it and/or
+               modify it under the same terms as Perl itself.

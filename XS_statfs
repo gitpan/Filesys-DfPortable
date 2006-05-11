@@ -1,0 +1,55 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#ifdef DFPORTABLE_STATFS_USE_MOUNT
+#include <sys/param.h>
+#include <sys/mount.h>
+#endif
+#ifdef DFPORTABLE_STATFS
+#include <sys/statfs.h>
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+
+typedef struct statfs Statfs;
+
+
+MODULE = Filesys::DfPortable	PACKAGE = Filesys::DfPortable
+
+void
+_dfportable(dir)
+	char *dir
+	PREINIT:
+	Statfs st;
+	PPCODE:
+#ifdef DFPORTABLE_SOLARIS
+	if(statfs(dir, &st, 0, 0) == 0) {
+#else
+	if(statfs(dir, &st) == 0) {
+#endif
+		EXTEND(sp, 4);
+        PUSHs(sv_2mortal(newSVnv((double)st.f_bsize)));
+		PUSHs(sv_2mortal(newSVnv((double)st.f_blocks)));
+		PUSHs(sv_2mortal(newSVnv((double)st.f_bfree)));
+#ifdef DFPORTABLE_SOLARIS
+		PUSHs(sv_2mortal(newSVnv((double)st.f_bfree)));
+#else
+		PUSHs(sv_2mortal(newSVnv((double)st.f_bavail)));
+#endif
+	}
+
+	else {
+		PUSHs(sv_2mortal(newSVuv(0)));
+		PUSHs(sv_2mortal(newSVuv(0)));
+		PUSHs(sv_2mortal(newSVuv(0)));
+		PUSHs(sv_2mortal(newSVuv(0)));
+	}
+
+
+
+		
