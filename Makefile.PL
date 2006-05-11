@@ -33,8 +33,8 @@ elsif(check_statvfs()) {
 elsif(check_statfs()) {
 	#### use_mount needed for headers
 	($statfs_use_mount) &&
-		($define .= "-DDFPORTABLE_STATFS ") ||
-		($define .= "-DDFPORTABLE_STATFS_USE_MOUNT ");
+		($define .= "-DDFPORTABLE_STATFS_USE_MOUNT ") ||
+		($define .= "-DDFPORTABLE_STATFS ");
 
 	#### Needed for 4 arg statfs
 	($Config{osname} =~ /^solaris$/i) &&

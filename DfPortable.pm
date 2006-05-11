@@ -9,7 +9,7 @@ require 5.006;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(dfportable);
-$VERSION = '0.81';
+$VERSION = '0.82';
 bootstrap Filesys::DfPortable $VERSION;
 
 sub dfportable {

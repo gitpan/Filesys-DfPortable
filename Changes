@@ -2,3 +2,6 @@ Revision history for Perl extension Filesys::DfPortable
                                                                                                                              
 0.81  Wedn May 10 22:56:11 2006
         - Module creation
+
+0.82  Wedn May 10 23:10:11 2006
+        - Oops had statfs header info backward in Makefile.PL
