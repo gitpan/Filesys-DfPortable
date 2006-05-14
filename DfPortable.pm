@@ -9,25 +9,28 @@ require 5.006;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(dfportable);
-$VERSION = '0.83';
+$VERSION = '0.84';
 bootstrap Filesys::DfPortable $VERSION;
 
 sub dfportable {
 my ($dir, $block_size) = @_;
-my %fs;
-my $used;
-my $per;
+my ($used, $fused);
+my ($per, $fper);
+my ($user_blocks, $user_used);
+my ($user_files, $user_fused);
+my %fs = ();
+
 
 	(defined($dir)) ||
-		(croak "Usage: df\(\$dir\) or df\(\$dir\, \$block_size)");
+		(croak "Usage: dfportable\(\$dir\) or dfportable\(\$dir\, \$block_size)");
 
 	#### If no requested block size then we will return the values in bytes
 	($block_size) ||
 		($block_size = 1);
 
-	my ($frsize, $blocks, $bfree, $bavail) = _dfportable($dir);
+	my ($frsize, $blocks, $bfree, $bavail, $files, $ffree, $favail) = _dfportable($dir);
 
-	#### Some system or XS failure, or something like /proc
+	#### Some system or XS failure, something like /proc, or bad $dir
 	if($frsize == 0 || $blocks == 0) {
 		return();
 	}
@@ -61,8 +64,8 @@ my $per;
 	#### There is a reserved amount for the su
 	#### or there are disk quotas
         if($bfree > $bavail) {
-                my $user_blocks = $blocks - ($bfree - $bavail);
-                my $user_used = $user_blocks - $bavail;
+                $user_blocks = $blocks - ($bfree - $bavail);
+                $user_used = $user_blocks - $bavail;
                 if($bavail < 0) {
                         #### over 100%
                         my $tmp_bavail = $bavail;
@@ -70,7 +73,13 @@ my $per;
                 }
                                                                                                          
                 else {
-                        $per = $user_used / $user_blocks;
+			if($user_used == 0) {
+				$per = 0;
+			}
+
+			else {
+                        	$per = $user_used / $user_blocks;
+			}
                 }
         }
                                                                                                          
@@ -82,6 +91,8 @@ my $per;
                                                                                                          
                 else {
                         $per = $used / $blocks;
+			$user_blocks = $blocks;
+			$user_used = $used;
                 }
         }
 
@@ -92,12 +103,82 @@ my $per;
         #### over 100%
         ($bavail < 0) &&
                 ($per += 100);
-                                                                                                         
-        $fs{per} = int($per);
-	$fs{blocks} = $blocks;
-	$fs{bfree} = $bfree;
-	$fs{bavail} = $bavail;
-	$fs{bused} = $used;
+
+        $fs{per}     = int($per);
+	$fs{blocks}  = $blocks;
+	$fs{bfree}   = $bfree;
+	$fs{bavail}  = $bavail;
+	$fs{bused}   = $used;
+
+
+
+	#### Handle inodes if system supports them
+	if(defined $files && $files > 0) {
+		$fused = $files - $ffree;
+                #### There is a reserved amount
+                if($ffree > $favail) {
+                        $user_files = $files - ($ffree - $favail);
+                        $user_fused = $user_files - $favail;
+                        if($favail < 0)  {
+                                #### over 100%
+                                my $tmp_favail = $favail;
+                                $fper = ($tmp_favail *= -1) / $user_files;
+                        }
+                                                                                                             
+                        else {
+				if($user_fused == 0) {
+					$fper = 0;
+				}
+
+				else {
+                                	$fper = $user_fused / $user_files;
+				}
+                        }
+                }
+                                                                                                             
+                #### su and user amount are the same
+                else {
+                        if($fused == 0) {
+                                $fper = 0;
+                        }
+                                                                                                             
+                        else {
+                                $fper = $fused / $files;
+                        }
+                                                                                                             
+                        $user_files = $files;
+                        $user_fused = $fused;
+                }
+
+                #### round
+                $fper *= 100;
+                $fper += .5;
+                                                                                                             
+                #### over 100%
+                ($favail < 0) &&
+                        ($fper += 100);
+
+		$fs{fper}        = int($fper);
+                $fs{files}       = $files;
+                $fs{ffree}       = $ffree;
+                $fs{favail}      = $favail;
+                $fs{fused}       = $fused;
+                #$fs{user_fused} = $user_fused;
+                #$fs{user_files} = $user_files;
+        }
+                                                                                                             
+        #### No valid inode info. Probably Windows or NFS
+	#### Instead of undefing, just have the user call exists().
+        #else {
+        #        $fs{fper}        = undef;
+        #        $fs{files}       = undef;
+        #        $fs{ffree}       = undef;
+        #        $fs{favail}      = undef;
+        #        $fs{fused}       = undef;
+        #        $fs{user_fused}  = undef;
+        #        $fs{user_files}  = undef;
+        #}
+                                                                                                             
 
 	return(\%fs);
 }
@@ -141,7 +222,7 @@ This module provides a portable way to obtain filesystem
 disk space information.
 
 The module should work with all versions of Windows (95 and up),
-all flavors of Unix, Mac OS X (Darwin, Tiger, etc), and Cygwin.
+all flavors of Unix, including Mac OS X (Darwin, Tiger, etc), and Cygwin.
 
 dfportable() requires a directory argument that represents the filesystem
 you want to query. There is also an optional block size argument so the
@@ -161,20 +242,42 @@ the hash are as follows:
 application. This can be different than bfree if you have per-user 
 quotas on the filesystem, or if the super user has a reserved amount.
 bavail can also be a negative value because of this. For instance
-if there is more space being used than on the disk than is available
-to you.
+if there is more space being used then you have available to you.
 
 {bused} = Total blocks used on the filesystem.
 
 {per} = Percent of disk space used. This is based on the disk space
 available to the user executing the application. In other words, if
 the filesystem has 10% of its space reserved for the superuser, then
-the percent used can go up to 110%.)
+the percent used can go up to 110%.
+
+You can obtain inode information through the module as well. But you
+must call exists() on the {files} key to make sure the information is
+available:
+if(exists($ref->{files})) {
+        #### Inode info is available
+}
+Some filesystems may not return inode information, for
+example Windows, and some NFS filesystems.
+                                                                                                             
+Here are the available inode keys:
+
+{files} = Total inodes on the filesystem.
+
+{ffree} = Total inodes free on the filesystem.
+
+{favail} = Total inodes available to the user executing the application.
+See the rules for the {bavail} key.
+
+{fused} = Total inodes used on the filesystem.
+
+{fper} = Percent of inodes used on the filesystem. See rules for the {per}
+key.
 
 
 If the dfportable() call fails for any reason, it will return
 undef. This will probably happen if you do anything crazy like try
-to get the space for /proc, or if you pass an invalid filesystem name,
+to get information for /proc, or if you pass an invalid filesystem name,
 or if there is an internal error. dfportable() will croak() if you pass
 it a undefined value.
 

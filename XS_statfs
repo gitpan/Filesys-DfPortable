@@ -27,13 +27,13 @@ _dfportable(dir)
 	PREINIT:
 	Statfs st;
 	PPCODE:
+	EXTEND(sp, 7);
 #ifdef DFPORTABLE_SOLARIS
 	if(statfs(dir, &st, 0, 0) == 0) {
 #else
 	if(statfs(dir, &st) == 0) {
 #endif
-		EXTEND(sp, 4);
-        PUSHs(sv_2mortal(newSVnv((double)st.f_bsize)));
+		PUSHs(sv_2mortal(newSVnv((double)st.f_bsize)));
 		PUSHs(sv_2mortal(newSVnv((double)st.f_blocks)));
 		PUSHs(sv_2mortal(newSVnv((double)st.f_bfree)));
 #ifdef DFPORTABLE_SOLARIS
@@ -41,10 +41,18 @@ _dfportable(dir)
 #else
 		PUSHs(sv_2mortal(newSVnv((double)st.f_bavail)));
 #endif
+		PUSHs(sv_2mortal(newSVnv((double)st.f_files)));
+		PUSHs(sv_2mortal(newSVnv((double)st.f_ffree)));
+		/* No favail */
+		PUSHs(sv_2mortal(newSVnv((double)st.f_ffree)));
 	}
 
 	else {
 		PUSHs(sv_2mortal(newSVuv(0)));
+		PUSHs(sv_2mortal(newSVuv(0)));
+		PUSHs(sv_2mortal(newSVuv(0)));
+		PUSHs(sv_2mortal(newSVuv(0)));
+
 		PUSHs(sv_2mortal(newSVuv(0)));
 		PUSHs(sv_2mortal(newSVuv(0)));
 		PUSHs(sv_2mortal(newSVuv(0)));

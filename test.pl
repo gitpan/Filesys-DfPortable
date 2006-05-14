@@ -25,7 +25,7 @@ my $ref = Filesys::DfPortable::dfportable($dir);
 
 defined($ref) and
 	print"ok 2\n" or
-	die "not ok 2\nstatvfs\(\) call failed for \"$dir\" $!\n";
+	die "not ok 2\ndfportable\(\) call failed for \"$dir\" $!\n";
 
 print"Results for directory: \"$dir\" in bytes:\n";
 print "Total: $ref->{blocks}\n";

@@ -1,12 +1,16 @@
 Revision history for Perl extension Filesys::DfPortable
                                                                                                                              
-0.81  Wedn May 10 22:56:11 2006
+0.81  Wed May 10 22:56:11 2006
         - Module creation
 
-0.82  Wedn May 10 23:10:11 2006
+0.82  Wed May 10 23:10:11 2006
         - Oops had statfs header info backward in Makefile.PL
 
-0.83  Thur May 11 17:00:11 2006
+0.83  Thu May 11 17:00:11 2006
         - Changed interface to return a reference to hash instead of a list
 	- Added hash values percent and used
 	- Stopped setting $!
+
+0.84  Sat May 13 21:55:11 2006
+        - Added inode information
+	- Fixed a possible bug with user blocks

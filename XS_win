@@ -35,19 +35,19 @@ _dfportable(pszDrive)
 
 		pGetDiskFreeSpaceEx = (PGETDISKFREESPACEEX) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetDiskFreeSpaceExA");
 
-		EXTEND(sp, 4);
+		EXTEND(sp, 7);
 		if(pGetDiskFreeSpaceEx) {
 			fResult = pGetDiskFreeSpaceEx (pszDrive,
-                 (PULARGE_INTEGER)&i64FreeBytesToCaller,
-                 (PULARGE_INTEGER)&i64TotalBytes,
-                 (PULARGE_INTEGER)&i64FreeBytes);
+                 	(PULARGE_INTEGER)&i64FreeBytesToCaller,
+                 	(PULARGE_INTEGER)&i64TotalBytes,
+                 	(PULARGE_INTEGER)&i64FreeBytes);
 
 			if(fResult) {
-				// XS doesn't have a long long equivalent
-				// will need to return a string instead
+				/* XS doesn't have a long long equivalent */
+				/* will need to return a string instead */
 				TCHAR szBuffer[32];
 
-				PUSHs(sv_2mortal(newSVuv(1))); // frsize on Windows is always 1
+				PUSHs(sv_2mortal(newSVuv(1))); /* frsize on Windows is always 1 */
 
 				_stprintf(szBuffer, TEXT("%I64u"), i64TotalBytes);
 				PUSHs(sv_2mortal(newSVpv((LPTSTR)(szBuffer), 0)));
@@ -57,10 +57,19 @@ _dfportable(pszDrive)
 
 				_stprintf(szBuffer, TEXT("%I64u"), i64FreeBytesToCaller);
 				PUSHs(sv_2mortal(newSVpv((LPTSTR)(szBuffer), 0)));
+
+				/* No inode values. */
+				PUSHs(sv_2mortal(newSVuv(0)));
+				PUSHs(sv_2mortal(newSVuv(0)));
+				PUSHs(sv_2mortal(newSVuv(0)));
       		}
 
 			else {
 				PUSHs(sv_2mortal(newSVuv(0)));
+				PUSHs(sv_2mortal(newSVuv(0)));
+				PUSHs(sv_2mortal(newSVuv(0)));
+				PUSHs(sv_2mortal(newSVuv(0)));
+
 				PUSHs(sv_2mortal(newSVuv(0)));
 				PUSHs(sv_2mortal(newSVuv(0)));
 				PUSHs(sv_2mortal(newSVuv(0)));
@@ -69,20 +78,20 @@ _dfportable(pszDrive)
 
 		else {
 			fResult = GetDiskFreeSpaceA (pszDrive, 
-                 &dwSectPerClust, 
-                 &dwBytesPerSect,
-                 &dwFreeClusters, 
-                 &dwTotalClusters);
+                 		&dwSectPerClust, 
+                 		&dwBytesPerSect,
+                 		&dwFreeClusters, 
+                 		&dwTotalClusters);
 
 
 			if(fResult) {
-				// XS doesn't have a long long equivalent
-				// will need to return a string instead
+				/* XS doesn't have a long long equivalent */
+				/* will need to return a string instead */
 				TCHAR szBuffer[32];
 				ULARGE_INTEGER ullTemp;
 				DWORD dwClusterSize = dwSectPerClust * dwBytesPerSect;
 
-				PUSHs(sv_2mortal(newSVuv(1))); // frsize on Windows is always 1
+				PUSHs(sv_2mortal(newSVuv(1))); /* frsize on Windows is always 1 */
 
 				ullTemp.QuadPart = (dwTotalClusters * dwClusterSize);
 				_stprintf(szBuffer, TEXT("%I64u"), ullTemp);
@@ -91,13 +100,21 @@ _dfportable(pszDrive)
 				ullTemp.QuadPart = (dwFreeClusters * dwClusterSize);
 				_stprintf(szBuffer, TEXT("%I64u"), ullTemp);
 				PUSHs(sv_2mortal(newSVpv((LPTSTR)(szBuffer), 0)));
-				// No bavail
+				/* No bavail */
 				PUSHs(sv_2mortal(newSVpv((LPTSTR)(szBuffer), 0)));
 
+				/* No inode values. */
+				PUSHs(sv_2mortal(newSVuv(0)));
+				PUSHs(sv_2mortal(newSVuv(0)));
+				PUSHs(sv_2mortal(newSVuv(0)));
       		}
 
 			else {
 				PUSHs(sv_2mortal(newSVuv(0)));
+				PUSHs(sv_2mortal(newSVuv(0)));
+				PUSHs(sv_2mortal(newSVuv(0)));
+				PUSHs(sv_2mortal(newSVuv(0)));
+
 				PUSHs(sv_2mortal(newSVuv(0)));
 				PUSHs(sv_2mortal(newSVuv(0)));
 				PUSHs(sv_2mortal(newSVuv(0)));
