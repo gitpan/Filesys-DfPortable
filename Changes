@@ -11,6 +11,5 @@ Revision history for Perl extension Filesys::DfPortable
 	- Added hash values percent and used
 	- Stopped setting $!
 
-0.84  Sat May 13 21:55:11 2006
-        - Added inode information
-	- Fixed a possible bug with user blocks
+0.85  Sat Jun 24 23:44:11 2006
+	- Updated documentation. No code changes.

@@ -23,13 +23,13 @@ _dfportable(pszDrive)
    	__int64 i64FreeBytesToCaller, i64TotalBytes, i64FreeBytes;
 	BOOL fResult;
 	DWORD dwSectPerClust, 
-          dwBytesPerSect, 
-          dwFreeClusters, 
-          dwTotalClusters;
+	      dwBytesPerSect, 
+	      dwFreeClusters, 
+	      dwTotalClusters;
 
 	PPCODE:
 		typedef BOOL (WINAPI *PGETDISKFREESPACEEX)(LPCSTR,
-        PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
+		PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
 
 		PGETDISKFREESPACEEX pGetDiskFreeSpaceEx;
 

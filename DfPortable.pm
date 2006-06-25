@@ -9,7 +9,7 @@ require 5.006;
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(dfportable);
-$VERSION = '0.84';
+$VERSION = '0.85';
 bootstrap Filesys::DfPortable $VERSION;
 
 sub dfportable {
@@ -188,7 +188,7 @@ __END__
 
 =head1 NAME
 
-Filesys::DfPortable - Perl extension for filesystem space.
+Filesys::DfPortable - Perl extension for filesystem disk space information.
 
 =head1 SYNOPSIS
 
@@ -203,8 +203,8 @@ Filesys::DfPortable - Perl extension for filesystem space.
      print"Total bytes used: $ref->{bused}\n";
      print"Percent full: $ref->{per}\n"
   }
-                                                                                                                
-                                                                                                                
+
+
   my $ref = dfportable("/tmp", 1024); # Display output in 1K blocks
   if(defined($ref)) {
      print"Total 1k blocks: $ref->{blocks}\n";
@@ -218,20 +218,25 @@ Filesys::DfPortable - Perl extension for filesystem space.
 
 =head1 DESCRIPTION
 
-This module provides a portable way to obtain filesystem 
-disk space information.
+This module provides a portable way to obtain filesystem disk space
+information. 
 
 The module should work with all versions of Windows (95 and up),
-all flavors of Unix, including Mac OS X (Darwin, Tiger, etc), and Cygwin.
+and with all flavors of Unix that implement the C<statvfs> or the C<statfs>
+calls. This would include Linux, *BSD, HP-UX, AIX, Solaris, Mac OS X, Irix,
+Cygwin, etc ...
 
-dfportable() requires a directory argument that represents the filesystem
-you want to query. There is also an optional block size argument so the
-you can tailor the size of the values returned. The default for block
-size is 1, this will cause the function to return the values in bytes.
+This module differs from Filesys::Df in that it has added support
+for Windows, but does not support open filehandles as a argument.
+
+C<dfportable()> requires a directory argument that represents the filesystem
+you want to query. There is also an optional block size argument so that
+you can tailor the size of the values returned. The default block size
+is 1, this will cause the function to return the values in bytes.
 If you never use the block size argument, then you can think of any
 instance of "blocks" in this document to really mean "bytes". 
 
-dfportable() returns a reference to a hash. The keys available in 
+C<dfportable()> returns a reference to a hash. The keys available in 
 the hash are as follows:
 
 {blocks} = Total blocks on the filesystem.
@@ -239,9 +244,9 @@ the hash are as follows:
 {bfree} = Total blocks free on the filesystem.
 
 {bavail} = Total blocks available to the user executing the Perl 
-application. This can be different than bfree if you have per-user 
+application. This can be different than C<{bfree}> if you have per-user 
 quotas on the filesystem, or if the super user has a reserved amount.
-bavail can also be a negative value because of this. For instance
+C<{bavail}> can also be a negative value because of this. For instance
 if there is more space being used then you have available to you.
 
 {bused} = Total blocks used on the filesystem.
@@ -252,14 +257,10 @@ the filesystem has 10% of its space reserved for the superuser, then
 the percent used can go up to 110%.
 
 You can obtain inode information through the module as well. But you
-must call exists() on the {files} key to make sure the information is
-available:
-if(exists($ref->{files})) {
-        #### Inode info is available
-}
-Some filesystems may not return inode information, for
+must call C<exists()> on the C<{files}> key to make sure the information is
+available. Some filesystems may not return inode information, for
 example Windows, and some NFS filesystems.
-                                                                                                             
+
 Here are the available inode keys:
 
 {files} = Total inodes on the filesystem.
@@ -267,25 +268,22 @@ Here are the available inode keys:
 {ffree} = Total inodes free on the filesystem.
 
 {favail} = Total inodes available to the user executing the application.
-See the rules for the {bavail} key.
+See the rules for the C<{bavail}> key.
 
 {fused} = Total inodes used on the filesystem.
 
-{fper} = Percent of inodes used on the filesystem. See rules for the {per}
+{fper} = Percent of inodes used on the filesystem. See rules for the C<{per}>
 key.
 
-
-If the dfportable() call fails for any reason, it will return
-undef. This will probably happen if you do anything crazy like try
+If the C<dfportable()> call fails for any reason, it will return
+C<undef>. This will probably happen if you do anything crazy like try
 to get information for /proc, or if you pass an invalid filesystem name,
-or if there is an internal error. dfportable() will croak() if you pass
+or if there is an internal error. C<dfportable()> will C<croak()> if you pass
 it a undefined value.
 
-
 Requirements:
-Your system must contain statvfs(), statfs(), GetDiskFreeSpaceA(), or GetDiskFreeSpaceEx().
+Your system must contain C<statvfs()>, C<statfs()>, C<GetDiskFreeSpaceA()>, or C<GetDiskFreeSpaceEx()>.
 You must be running Perl 5.6 or higher.
-
 
 =head1 AUTHOR
 
@@ -298,7 +296,7 @@ Copyright (c) 2006 Ian Guthrie. All rights reserved.
 
 =head1 SEE ALSO
 
-statvfs(2), df(1M), statfs(1M), GetDiskFreeSpaceA, GetDiskFreeSpaceEx
+statvfs(2), statfs(2), df(1), GetDiskFreeSpaceA, GetDiskFreeSpaceEx, Filesys::Df
 
 perl(1).
 
